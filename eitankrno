@@ -1,1 +1,345 @@
-a
+local Axion = loadstring(game:HttpGet("https://raw.githubusercontent.com/adamowaissi22-boop/Axom-Scripts-/refs/heads/main/Axion%20Ui%20Library"))()
+
+local Window = Axion:CreateWindow({
+    Name = "Axion - Demo Script",
+    Subtitle = "UI Library Demo",
+    Version = "v1.0",
+    LoadingTitle = "Demo Script",
+    LoadingSubtitle = "Axion Demo",
+    Theme = "Default",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "AxionConfig",
+        FileName = "DemoConfig"
+    },
+    AnimationSpeed = 0.3,
+    RippleEnabled = true,
+    CornerRadius = 12,
+    ToggleKey = Enum.KeyCode.RightShift
+})
+
+local MainTab = Window:CreateTab({
+    Name = "Main",
+    Icon = "⭐"
+})
+
+local VisualTab = Window:CreateTab({
+    Name = "Visual",
+    Icon = "👁️"
+})
+
+local SettingsTab = Window:CreateTab({
+    Name = "Settings",
+    Icon = "⚙️"
+})
+
+local MainSection = MainTab:CreateSection("Main Features")
+
+local noclipToggle = MainSection:CreateToggle({
+    Name = "NoClip",
+    CurrentValue = false,
+    Flag = "NoClip",
+    Callback = function(value)
+        if value then
+            game:GetService("RunService").Stepped:Connect(function()
+                if game.Players.LocalPlayer.Character then
+                    for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+local flyToggle = MainSection:CreateToggle({
+    Name = "Fly",
+    CurrentValue = false,
+    Flag = "Fly",
+    Callback = function(value)
+        local player = game.Players.LocalPlayer
+        if value then
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
+            bodyVelocity.Parent = player.Character.HumanoidRootPart
+            
+            local flySpeed = 50
+            game:GetService("UserInputService").InputBegan:Connect(function(input)
+                if input.KeyCode == Enum.KeyCode.W then
+                    bodyVelocity.Velocity = player.Character.HumanoidRootPart.CFrame.LookVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.S then
+                    bodyVelocity.Velocity = -player.Character.HumanoidRootPart.CFrame.LookVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.A then
+                    bodyVelocity.Velocity = -player.Character.HumanoidRootPart.CFrame.RightVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.D then
+                    bodyVelocity.Velocity = player.Character.HumanoidRootPart.CFrame.RightVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.Space then
+                    bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)
+                elseif input.KeyCode == Enum.KeyCode.LeftShift then
+                    bodyVelocity.Velocity = Vector3.new(0, -flySpeed, 0)
+                end
+            end)
+            
+            game:GetService("UserInputService").InputEnded:Connect(function(input)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            end)
+        else
+            if player.Character and player.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
+                player.Character.HumanoidRootPart.BodyVelocity:Destroy()
+            end
+        end
+    end
+})
+
+local speedToggle = MainSection:CreateToggle({
+    Name = "Speed Hack",
+    CurrentValue = false,
+    Flag = "Speed",
+    Callback = function(value)
+        if value then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 50
+        else
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
+    end
+})
+
+local jumpToggle = MainSection:CreateToggle({
+    Name = "High Jump",
+    CurrentValue = false,
+    Flag = "HighJump",
+    Callback = function(value)
+        if value then
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = 100
+        else
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = 50
+        end
+    end
+})
+
+local teleportButton = MainSection:CreateButton({
+    Name = "Teleport to Spawn",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 5, 0)
+    end
+})
+
+local killButton = MainSection:CreateButton({
+    Name = "Kill Character",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        player.Character.Humanoid.Health = 0
+    end
+})
+
+local respawnButton = MainSection:CreateButton({
+    Name = "Respawn",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        player:LoadCharacter()
+    end
+})
+
+local VisualSection = VisualTab:CreateSection("Visual Effects")
+
+local espToggle = VisualSection:CreateToggle({
+    Name = "ESP",
+    CurrentValue = false,
+    Flag = "ESP",
+    Callback = function(value)
+        if value then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "AxionESP"
+                    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    highlight.Adornee = player.Character
+                    highlight.Parent = player.Character
+                end
+            end
+        else
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character then
+                    local esp = player.Character:FindFirstChild("AxionESP")
+                    if esp then
+                        esp:Destroy()
+                    end
+                end
+            end
+        end
+    end
+})
+
+local fullbrightToggle = VisualSection:CreateToggle({
+    Name = "FullBright",
+    CurrentValue = false,
+    Flag = "Fullbright",
+    Callback = function(value)
+        if value then
+            game.Lighting.GlobalShadows = false
+            game.Lighting.Brightness = 2
+        else
+            game.Lighting.GlobalShadows = true
+            game.Lighting.Brightness = 1
+        end
+    end
+})
+
+local chamsToggle = VisualSection:CreateToggle({
+    Name = "Chams",
+    CurrentValue = false,
+    Flag = "Chams",
+    Callback = function(value)
+        if value then
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.Material = Enum.Material.ForceField
+                            part.Transparency = 0.3
+                        end
+                    end
+                end
+            end
+        else
+            for _, player in pairs(game.Players:GetPlayers()) do
+                if player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.Material = Enum.Material.Plastic
+                            part.Transparency = 0
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
+
+local walkSpeedSlider = VisualSection:CreateSlider({
+    Name = "Walk Speed",
+    Range = {16, 200},
+    Increment = 1,
+    Suffix = " studs",
+    CurrentValue = 16,
+    Flag = "WalkSpeed",
+    Callback = function(value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end
+})
+
+local jumpPowerSlider = VisualSection:CreateSlider({
+    Name = "Jump Power",
+    Range = {50, 500},
+    Increment = 5,
+    Suffix = " power",
+    CurrentValue = 50,
+    Flag = "JumpPower",
+    Callback = function(value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+    end
+})
+
+local fovSlider = VisualSection:CreateSlider({
+    Name = "FOV",
+    Range = {70, 120},
+    Increment = 1,
+    Suffix = "°",
+    CurrentValue = 70,
+    Flag = "FOV",
+    Callback = function(value)
+        workspace.CurrentCamera.FieldOfView = value
+    end
+})
+
+local espColorPicker = VisualSection:CreateColorPicker({
+    Name = "ESP Color",
+    Color = Color3.fromRGB(255, 0, 0),
+    Flag = "ESPColor",
+    Callback = function(color)
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                local esp = player.Character:FindFirstChild("AxionESP")
+                if esp then
+                    esp.FillColor = color
+                end
+            end
+        end
+    end
+})
+
+local SettingsSection = SettingsTab:CreateSection("Interface Settings")
+
+local themeDropdown = SettingsSection:CreateDropdown({
+    Name = "Theme",
+    Options = {"Default", "Dark", "Light", "Ocean", "Midnight", "Emerald", "Crimson", "Galaxy", "Sunset", "Cyberpunk"},
+    CurrentOption = "Default",
+    Flag = "Theme",
+    Callback = function(value)
+        Window:SetTheme(value)
+    end
+})
+
+local resetButton = SettingsSection:CreateButton({
+    Name = "Reset Settings",
+    Callback = function()
+        noclipToggle:Set(false)
+        flyToggle:Set(false)
+        speedToggle:Set(false)
+        jumpToggle:Set(false)
+        espToggle:Set(false)
+        fullbrightToggle:Set(false)
+        chamsToggle:Set(false)
+        walkSpeedSlider:Set(16)
+        jumpPowerSlider:Set(50)
+        fovSlider:Set(70)
+        espColorPicker:Set(Color3.fromRGB(255, 0, 0))
+    end
+})
+
+local destroyButton = SettingsSection:CreateButton({
+    Name = "Destroy UI",
+    Callback = function()
+        Window:Destroy()
+    end
+})
+
+local KeybindSection = SettingsTab:CreateSection("Keybinds")
+
+local toggleKeybind = KeybindSection:CreateKeybind({
+    Name = "Toggle UI",
+    CurrentKeybind = "RightShift",
+    Flag = "ToggleKey",
+    Callback = function()
+        Window:Toggle()
+    end
+})
+
+local noclipKeybind = KeybindSection:CreateKeybind({
+    Name = "NoClip Toggle",
+    CurrentKeybind = "N",
+    Flag = "NoClipKey",
+    Callback = function()
+        noclipToggle:Set(not noclipToggle.Value)
+    end
+})
+
+local flyKeybind = KeybindSection:CreateKeybind({
+    Name = "Fly Toggle",
+    CurrentKeybind = "F",
+    Flag = "FlyKey",
+    Callback = function()
+        flyToggle:Set(not flyToggle.Value)
+    end
+})
+
+local InfoSection = SettingsTab:CreateSection("Information")
+
+local authorLabel = InfoSection:CreateLabel("Made with Axion UI Library")
+local versionLabel = InfoSection:CreateLabel("Version: 1.0")
+local playerLabel = InfoSection:CreateLabel("Player: " .. game.Players.LocalPlayer.Name)
